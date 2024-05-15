@@ -74,3 +74,63 @@
       @apply bg-background text-foreground;
     }
   }
+
+  .Calculator {
+    display: flex;
+    flex: 1;
+    padding: 5%;
+    align-items: center;
+    justify-content: center;
+  }
+  .calc-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    height: 75vh;
+    min-height: 300px;
+    max-height: 100%;
+    background: #161311;
+    padding: 2%;
+    border-radius: 20px;
+  }
+  .row {
+    display: flex;
+    align-items: stretch;
+  }
+  
+  button {
+    border: none;
+    border-radius: 5px;
+    background: #000000;
+    color: white;
+    box-shadow: 2px 0px 4px 1px #a9afb6;
+  }
+  
+  .row > button {
+    flex: 1;
+    font-size: 5vh;
+  }
+  .row > button,
+  .input,
+  .clear {
+    margin: 1.5%;
+  }
+  .calc-wrapper > div,
+  .calc-wrapper > button {
+    flex: 1;
+  }
+  .input {
+    text-align: right;
+    background: #8ac1e0;
+    border-radius: 5px;
+    color: rgb(238, 236, 236);
+    font-size: 5vh;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .clear {
+    font-size: 3vh;
+    text-transform: uppercase;
+  }
+  

@@ -21,7 +21,7 @@ export function Components() {
           <div className="flex h-[60px] items-center px-6">
             <Link className="flex items-center gap-2 font-semibold" href="#">
               <Package2Icon className="h-6 w-6" />
-              <span className="">Transactions</span>
+              <span className="">Manager</span>
             </Link>
           </div>
           <div className="flex-1">
