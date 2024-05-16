@@ -10,6 +10,7 @@ import Calculator from './Calculator/Calculator';
 import History from './History/page';
 import Settings from './Settings/page';
 import "./globals.css"
+import To_DO from "./To_Do/page";
 
 export default function App() {
   return (
@@ -28,6 +29,10 @@ export default function App() {
               <HomeIcon className="h-4 w-4" />
               Home
             </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50" to="/To_DO">
+              <CalculatorIcon className="h-4 w-4" />
+              To Do Manager
+            </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50" to="/Calculator">
               <CalculatorIcon className="h-4 w-4" />
               Calculator
@@ -42,9 +47,11 @@ export default function App() {
             </Link>
           </nav>
         </div>
+        
         <div className="flex-grow">
           <Routes>
             <Route path="/Context" element={<Home />} />
+            <Route path="/To_do" element={<To_DO />} />
             <Route path="/Calculator" element={<Calculator />} />
             <Route path="/History" element={<History />} />
             <Route path="/Settings" element={<Settings />} />
