@@ -71,5 +71,4 @@ const Calculator = () => {
     </div>
   );
 };
-
-export default Calculator;
+export default  Calculator;
