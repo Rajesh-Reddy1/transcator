@@ -1,8 +1,4 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/1pzmcszYAxj
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+import '@/app/globals.css'
 export default function History() {
     return (
       <div className="container mx-auto px-4 py-8 md:py-12">

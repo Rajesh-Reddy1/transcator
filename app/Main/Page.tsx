@@ -5,7 +5,7 @@ import { CalculatorIcon } from "@/components/icons/CalculatorIcon";
 import { HistoryIcon } from "@/components/icons/HistoryIcon";
 import { SettingsIcon } from "@/components/icons/SettingsIcon";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-
+import '@/app/globals.css'
 
 import Home from '../Context/Context';
 import Calculator from '../Calculator/Calculator';

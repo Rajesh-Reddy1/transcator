@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { PencilIcon } from "../../components/icons/PencilIcon";
 import { TrashIcon } from "../../components/icons/TrashIcon";
 import { ArrowUpDownIcon } from "@/components/icons/ArrowUpDownIcon";
+import '@/app/globals.css'
 
 export default function TransactionsPage() {
   return (
