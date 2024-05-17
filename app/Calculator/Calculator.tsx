@@ -93,6 +93,10 @@ const Calculator = () => {
   };
 
   return (
+    <>
+      <header className="bg-gray-900 text-white py-4 px-6">
+        <h1 className="text-2xl font-bold">Calculator</h1>
+      </header>
     <div className="calculator">
       <div className="display">{input}</div>
       <div className="buttons">
@@ -159,6 +163,7 @@ const Calculator = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
