@@ -25,6 +25,9 @@ import { TrashIcon } from "../../components/icons/TrashIcon";
 import { ArrowUpDownIcon } from "@/components/icons/ArrowUpDownIcon";
 import { useState } from "react";
 import '@/app/globals.css'
+import { useAuth } from "@/components/AuthContext";
+import { db } from "@/firebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
 type Transaction = {
   name: string;
   description: string;
@@ -33,7 +36,13 @@ type Transaction = {
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+const { userEmail } = useAuth();
 
+if (!userEmail) {
+
+  console.error('User is not logged in');
+  return;
+}
   const [newTransaction, setNewTransaction] = useState<Transaction>({
     name: "",
     description: "",
@@ -54,7 +63,21 @@ export default function TransactionsPage() {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleAddTransaction = () => {
+  // const handleAddTransaction = () => {
+  //   if (newTransaction.amount !== 0) {
+  //     if (isEditing) {
+  //       const updatedTransactions = [...transactions];
+  //       updatedTransactions[editingIndex as number] = newTransaction;
+  //       setTransactions(updatedTransactions);
+  //       setIsEditing(false);
+  //     } else {
+  //       setTransactions([...transactions, newTransaction]);
+  //     }
+  //   }
+  //   setNewTransaction({ name: "", description: "", amount: 0 });
+  //   setIsDrawerOpen(false); // Close the drawer
+  // };
+  const handleAddTransaction = async () => {
     if (newTransaction.amount !== 0) {
       if (isEditing) {
         const updatedTransactions = [...transactions];
@@ -63,11 +86,18 @@ export default function TransactionsPage() {
         setIsEditing(false);
       } else {
         setTransactions([...transactions, newTransaction]);
+        try {
+          const docRef = await addDoc(collection(db, "users", userEmail, "transactions"), newTransaction);
+          console.log("Document written with ID: ", docRef.id);
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
       }
     }
     setNewTransaction({ name: "", description: "", amount: 0 });
     setIsDrawerOpen(false); // Close the drawer
   };
+  
 
   const handleEditTransaction = (index: number) => {
     const transactionToEdit = transactions[index];
@@ -77,9 +107,15 @@ export default function TransactionsPage() {
     setEditingIndex(index);
   };
 
-  const handleDeleteTransaction = (index: number) => {
+  const handleDeleteTransaction = async (index: number) => {
     setTransactions(transactions.filter((_, i) => i !== index));
+    try {
+      await addDoc(collection(db, "users", userEmail, "transactions"), newTransaction);
+    } catch (e) {
+      console.error("Error removing document: ", e);
+    }
   };
+  
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);

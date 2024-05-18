@@ -19,7 +19,6 @@ import { useAuth } from '@/components/AuthContext';
   return (
     <Router>
       <div className="flex h-screen">
-        {/* Sidebar */}
         <div className="flex flex-col w-64 bg-gray-100/40 p-4 sticky top-0 dark:bg-gray-800/40">
           <div className="flex h-[60px] items-center px-6">
             <Link className="flex items-center gap-2 font-semibold" to="/">
