@@ -24,6 +24,7 @@ import { PencilIcon } from "../../components/icons/PencilIcon";
 import { TrashIcon } from "../../components/icons/TrashIcon";
 import { ArrowUpDownIcon } from "@/components/icons/ArrowUpDownIcon";
 import { useState } from "react";
+import '@/app/globals.css'
 type Transaction = {
   name: string;
   description: string;
@@ -205,7 +206,7 @@ export default function TransactionsPage() {
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>
                       {transaction.amount !== 0
-                        ? `$${transaction.amount.toFixed(2)}`
+                        ? `${transaction.amount.toFixed(2)}`
                         : ""}
                     </TableCell>
                     <TableCell className="flex items-center gap-2">
