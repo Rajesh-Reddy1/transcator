@@ -12,10 +12,10 @@ import Calculator from '../Calculator/Calculator';
 import History from '../History/page';
 import Welcome from "../Welcome/page";
 import To_DOPage from "../To_Do/page";
-
-
+import { useAuth } from '@/components/AuthContext'; 
 
   export default function Frist() {
+    const { userEmail } = useAuth();
   return (
     <Router>
       <div className="flex h-screen">
@@ -24,7 +24,7 @@ import To_DOPage from "../To_Do/page";
           <div className="flex h-[60px] items-center px-6">
             <Link className="flex items-center gap-2 font-semibold" to="/">
               <Package2Icon className="h-6 w-6" />
-              <span className="">Manager</span>
+              <span className=""> Manager</span>
             </Link>
           </div>
           <nav className="grid items-start px-4 text-sm font-medium mt-4">
@@ -42,7 +42,7 @@ import To_DOPage from "../To_Do/page";
             </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50" to="/History">
               <HistoryIcon className="h-4 w-4" />
-              History
+              History 
             </Link>
           </nav>
         </div>

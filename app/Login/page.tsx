@@ -14,8 +14,10 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useRouter } from "next/navigation";
+import { useAuth } from '@/components/AuthContext';
 
 export default function Auth() {
+  const { setUserEmail } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,13 +26,14 @@ export default function Auth() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const auth = getAuth(app);
+  
   const navigate = useRouter();
-
   const handleAuth = async () => {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         setMessage("Login successful!");
+        setUserEmail(email);
         setShowSuccess(true);
         navigate.push('./Home')
       } else {
@@ -53,7 +56,7 @@ export default function Auth() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.2, ease: "easeInOut" },
+      transition: { duration: 0.1, ease: "easeInOut" },
     },
   };
 

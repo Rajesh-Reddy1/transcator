@@ -9,6 +9,8 @@
     "baseColor": "gray",
     "cssVariables": true,
     "prefix": ""
+  
+
   },
   "aliases": {
     "components": "@/components",
