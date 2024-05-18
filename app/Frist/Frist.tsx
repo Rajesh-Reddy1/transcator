@@ -3,19 +3,19 @@ import { Package2Icon } from "@/components/icons/Package2Icon";
 import { HomeIcon } from "@/components/icons/HomeIcon";
 import { CalculatorIcon } from "@/components/icons/CalculatorIcon";
 import { HistoryIcon } from "@/components/icons/HistoryIcon";
-import { SettingsIcon } from "@/components/icons/SettingsIcon";
+
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import '@/app/globals.css'
 
 import Home from '../Context/Context';
 import Calculator from '../Calculator/Calculator';
 import History from '../History/page';
-import To_DO from "../To_Do/page";
 import Welcome from "../Welcome/page";
+import To_DOPage from "../To_Do/page";
 
 
 
-  export default function Main() {
+  export default function Frist() {
   return (
     <Router>
       <div className="flex h-screen">
@@ -52,7 +52,7 @@ import Welcome from "../Welcome/page";
           <Routes>
           <Route path="/" element={<Welcome />} />
             <Route path="/Context" element={<Home />} />
-            <Route path="/To_do" element={<To_DO />} />
+            <Route path="/To_do" element={<To_DOPage />} />
             <Route path="/Calculator" element={<Calculator />} />
             <Route path="/History" element={<History />} />
           </Routes>

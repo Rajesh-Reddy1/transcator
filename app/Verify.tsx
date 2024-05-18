@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useRouter } from "next/navigation";
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -21,13 +23,15 @@ export default function Auth() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const auth = getAuth(app);
+  const navigate = useRouter();
 
   const handleAuth = async () => {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         setMessage("Login successful!");
-        setShowSuccess(true); // Show success animation
+        setShowSuccess(true);
+        navigate.push('./Frist')
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
         setMessage("Sign up successful!");
@@ -48,7 +52,7 @@ export default function Auth() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeInOut" },
+      transition: { duration: 0.2, ease: "easeInOut" },
     },
   };
 
@@ -62,8 +66,13 @@ export default function Auth() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-[url('/texture.png')] bg-repeat bg-[length:200px_200px] bg-gray-900">
-      <div className="mx-auto max-w-[400px] space-y-6 bg-gradient-to-br from-purple-500 to-pink-500 p-6 rounded-lg shadow-lg dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900">
+    <>
+      <div className="w-full min-h-screen flex items-center justify-center bg-[url('texture.jpg')] bg-cover bg-center">
+      
+      <div
+        className="mx-auto max-w-[400px] space-y-6 bg-gradient-to-br from-gray-400 to-gray-600 p-6 rounded-lg shadow-lg dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900"
+        style={{ border: "2px solid white" }}
+      >
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold text-white dark:text-gray-100">
             {isLogin ? "Welcome back" : "Create account"}
@@ -102,7 +111,7 @@ export default function Auth() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-            />
+              />
           </div>
 
           <AnimatePresence>
@@ -112,20 +121,19 @@ export default function Auth() {
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
-                className="text-green-500 mt-2"
+                className="text-black-500 mt-2"
               >
                 {message}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Animated error message */}
           <AnimatePresence>
             {showError && (
               <motion.div
-                variants={errorVariants}
-                initial="hidden"
-                animate="visible"
+              variants={errorVariants}
+              initial="hidden"
+              animate="visible"
                 exit="hidden"
                 className="text-red-500 mt-2"
               >
@@ -149,5 +157,6 @@ export default function Auth() {
         </div>
       </div>
     </div>
+</>
   );
 }
