@@ -23,12 +23,22 @@ import { Button } from "@/components/ui/button";
 import { PencilIcon } from "../../components/icons/PencilIcon";
 import { TrashIcon } from "../../components/icons/TrashIcon";
 import { ArrowUpDownIcon } from "@/components/icons/ArrowUpDownIcon";
-import { useState } from "react";
-import '@/app/globals.css'
+import { useEffect, useState } from "react";
+import "@/app/globals.css";
 import { useAuth } from "@/components/AuthContext";
 import { db } from "@/firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  setDoc,
+} from "firebase/firestore";
+
 type Transaction = {
+  id?: string;
   name: string;
   description: string;
   amount: number;
@@ -36,18 +46,22 @@ type Transaction = {
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-const { userEmail } = useAuth();
+  const { userEmail } = useAuth();
 
-if (!userEmail) {
-
-  console.error('User is not logged in');
-  return;
-}
+  if (!userEmail) {
+    console.error("User is not logged in");
+    return;
+  }
   const [newTransaction, setNewTransaction] = useState<Transaction>({
     name: "",
     description: "",
     amount: 0,
   });
+  const handleOpenDrawerForAdding = () => {
+    setIsDrawerOpen(true);
+    setIsEditing(false); 
+    setEditingIndex(null); 
+  };
 
   const handleInputChange = (e: any) => {
     if (e.target.id === "amount") {
@@ -63,41 +77,63 @@ if (!userEmail) {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  // const handleAddTransaction = () => {
-  //   if (newTransaction.amount !== 0) {
-  //     if (isEditing) {
-  //       const updatedTransactions = [...transactions];
-  //       updatedTransactions[editingIndex as number] = newTransaction;
-  //       setTransactions(updatedTransactions);
-  //       setIsEditing(false);
-  //     } else {
-  //       setTransactions([...transactions, newTransaction]);
-  //     }
-  //   }
-  //   setNewTransaction({ name: "", description: "", amount: 0 });
-  //   setIsDrawerOpen(false); // Close the drawer
-  // };
+
   const handleAddTransaction = async () => {
     if (newTransaction.amount !== 0) {
       if (isEditing) {
         const updatedTransactions = [...transactions];
         updatedTransactions[editingIndex as number] = newTransaction;
         setTransactions(updatedTransactions);
-        setIsEditing(false);
+        setIsEditing(false); 
+        setEditingIndex(null); 
       } else {
-        setTransactions([...transactions, newTransaction]);
         try {
-          const docRef = await addDoc(collection(db, "users", userEmail, "transactions"), newTransaction);
+          const docRef = await addDoc(
+            collection(db, "users", userEmail, "transactions"),
+            newTransaction
+          );
           console.log("Document written with ID: ", docRef.id);
+          const newTransactionWithId = { ...newTransaction, id: docRef.id };
+          setTransactions([...transactions, newTransactionWithId]);
         } catch (e) {
           console.error("Error adding document: ", e);
         }
       }
     }
     setNewTransaction({ name: "", description: "", amount: 0 });
-    setIsDrawerOpen(false); // Close the drawer
+    setIsDrawerOpen(false); 
+    setIsEditing(false); // Reset isEditing after adding or updating
+    setEditingIndex(null);
   };
   
+
+  const handleSaveEditTransaction = async () => {
+    if (editingIndex !== null) {
+      const transactionId = transactions[editingIndex].id;
+      if (!transactionId) {
+        console.error("Transaction ID is undefined");
+        return;
+      }
+      try {
+        await setDoc(
+          doc(db, "users", userEmail, "transactions", transactionId),
+          newTransaction
+        );
+        const updatedTransactions = transactions.map((transaction, index) =>
+          index === editingIndex
+            ? { ...newTransaction, id: transactionId }
+            : transaction
+        );
+        setTransactions(updatedTransactions);
+      } catch (e) {
+        console.error("Error updating document: ", e);
+      }
+      setEditingIndex(null);
+    }
+    setNewTransaction({ name: "", description: "", amount: 0 });
+    setIsDrawerOpen(false);
+    setEditingIndex(null); // Close the drawer
+  };
 
   const handleEditTransaction = (index: number) => {
     const transactionToEdit = transactions[index];
@@ -108,30 +144,40 @@ if (!userEmail) {
   };
 
   const handleDeleteTransaction = async (index: number) => {
+    const transactionId = transactions[index].id;
+    if (!transactionId) {
+      console.error("Transaction ID is undefined");
+      return;
+    }
     setTransactions(transactions.filter((_, i) => i !== index));
     try {
-      await addDoc(collection(db, "users", userEmail, "transactions"), newTransaction);
+      await deleteDoc(
+        doc(db, "users", userEmail, "transactions", transactionId)
+      );
     } catch (e) {
       console.error("Error removing document: ", e);
     }
+    setIsEditing(false); // Reset the isEditing state
   };
-  
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const handleSaveEditTransaction = () => {
-    if (editingIndex !== null) {
-      setTransactions(
-        transactions.map((transaction, index) =>
-          index === editingIndex ? newTransaction : transaction
-        )
-      );
-      setEditingIndex(null);
+  useEffect(() => {
+    if (userEmail) {
+      const q = query(collection(db, "users", userEmail, "transactions"));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        let newTransactions: Transaction[] = [];
+        snapshot.forEach((doc) => {
+          newTransactions.push(doc.data() as Transaction);
+        });
+        setTransactions(newTransactions);
+      });
+
+      // Clean up the listener when the component unmounts
+      return () => unsubscribe();
     }
-    setNewTransaction({ name: "", description: "", amount: 0 });
-    setIsDrawerOpen(false); // Close the drawer
-  };
+  }, [userEmail]);
 
   return (
     <>
@@ -145,7 +191,7 @@ if (!userEmail) {
               <Button
                 className="ml-auto bg-gray-900 text-gray-50 hover:bg-gray-900/90 focus-visible:ring-gray-950 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
                 size="lg"
-                onClick={() => setIsDrawerOpen(true)}
+                onClick={handleOpenDrawerForAdding}
               >
                 Add Transaction
               </Button>
@@ -191,20 +237,30 @@ if (!userEmail) {
                 </div>
               </div>
               <DrawerFooter>
-                <Button type="button" onClick={handleAddTransaction}>
+              <Button
+                  type="button"
+                  onClick={
+                    isEditing
+                      ? handleSaveEditTransaction
+                      : handleAddTransaction
+                  }
+                >
                   {isEditing ? "Update" : "Save"}
                 </Button>
+
                 <DrawerClose asChild>
                   <Button
                     variant="outline"
-                    onClick={() => setIsDrawerOpen(false)}
+                    onClick={() => {
+                      setIsDrawerOpen(false);
+                        // Reset the isEditing state when the drawer is closed
+                    }}
                   >
                     Cancel
                   </Button>
                 </DrawerClose>
               </DrawerFooter>
             </DrawerContent>
-            
           </Drawer>
         </div>
       </header>
