@@ -1,3 +1,4 @@
+
 "use client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,12 @@ export default function To_Do() {
       const querySnapshot = await getDocs(q);
       const fetchedTasks: Task[] = [];
       querySnapshot.forEach((doc) => {
-        fetchedTasks.push({ ...doc.data(), id: doc.id } as Task); // Type assertion
+        fetchedTasks.push({
+          ...doc.data(),
+          id: doc.id,
+          // Convert the Timestamp to a Date object
+          dueDate: doc.data().dueDate.toDate(), 
+        } as Task); 
       });
       setTasks(fetchedTasks);
     };
@@ -183,9 +189,12 @@ export default function To_Do() {
                   </Button>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Due date:{" "}
-                  {task.dueDate ? task.dueDate.toLocaleDateString() : "N/A"}
-                </p>
+      Due date:{" "}
+      {task.dueDate
+        ? task.dueDate.toLocaleDateString() // Now task.dueDate is a Date object
+        : "N/A"
+      }
+    </p>
               </Card>
             ))}
           </div>

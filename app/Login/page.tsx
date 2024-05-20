@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from '@/components/AuthContext';
 
 export default function Auth() {
-  const { setUserEmail } = useAuth();
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,18 +26,49 @@ export default function Auth() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const auth = getAuth(app);
+  const { setUserEmail, setUserToken } = useAuth();
   
   const navigate = useRouter();
+  // const handleAuth = async () => {
+  //   try {
+  //     if (isLogin) {
+  //       await signInWithEmailAndPassword(auth, email, password);
+  //       setMessage("Login successful!");
+  //       setUserEmail(email);
+  //       setShowSuccess(true);
+  //       navigate.push('./Home')
+  //     } else {
+  //       await createUserWithEmailAndPassword(auth, email, password);
+  //       setMessage("Sign up successful!");
+  //       setShowSuccess(true);
+  //     }
+
+  //     setError(null);
+  //     setShowError(false);
+  //   } catch (error: any) {
+  //     setError(error.message);
+  //     setShowError(true);
+  //     setShowSuccess(false);
+  //   }
+  // };
   const handleAuth = async () => {
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const token = await user.getIdToken(); // Get JWT from the user
+
+        setUserToken(token); // Update the token in your context
         setMessage("Login successful!");
         setUserEmail(email);
         setShowSuccess(true);
         navigate.push('./Home')
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const token = await user.getIdToken(); // Get JWT from the user
+
+        setUserToken(token); // Update the token in your context
         setMessage("Sign up successful!");
         setShowSuccess(true);
       }
