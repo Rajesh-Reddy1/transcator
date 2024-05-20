@@ -1,11 +1,12 @@
 "use client";
-import React, { useState } from "react";
-import backgroundImage from './texture.jpg';
+import React, { useEffect, useState } from "react";
+
 
 import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  onAuthStateChanged 
 } from "firebase/auth";
 import { app } from "@/firebaseConfig";
 import { Label } from "@/components/ui/label";
@@ -29,28 +30,6 @@ export default function Auth() {
   const { setUserEmail, setUserToken } = useAuth();
   
   const navigate = useRouter();
-  // const handleAuth = async () => {
-  //   try {
-  //     if (isLogin) {
-  //       await signInWithEmailAndPassword(auth, email, password);
-  //       setMessage("Login successful!");
-  //       setUserEmail(email);
-  //       setShowSuccess(true);
-  //       navigate.push('./Home')
-  //     } else {
-  //       await createUserWithEmailAndPassword(auth, email, password);
-  //       setMessage("Sign up successful!");
-  //       setShowSuccess(true);
-  //     }
-
-  //     setError(null);
-  //     setShowError(false);
-  //   } catch (error: any) {
-  //     setError(error.message);
-  //     setShowError(true);
-  //     setShowSuccess(false);
-  //   }
-  // };
   const handleAuth = async () => {
     try {
       if (isLogin) {
@@ -81,7 +60,7 @@ export default function Auth() {
       setShowSuccess(false);
     }
   };
-
+  
   const successVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -90,7 +69,7 @@ export default function Auth() {
       transition: { duration: 0.1, ease: "easeInOut" },
     },
   };
-
+  
   const errorVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -98,7 +77,21 @@ export default function Auth() {
       y: 0,
       transition: { duration: 0.5, ease: "easeInOut" },
     },
+    
+    
   };
+  useEffect(() => {
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const token = await user.getIdToken();
+        setUserToken(token);
+        if (user.email) {
+          setUserEmail(user.email);
+        }
+      }
+    });
+  }, []);
 
   return (
     <>

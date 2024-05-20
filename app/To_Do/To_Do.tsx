@@ -1,4 +1,3 @@
-
 "use client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,13 +36,9 @@ export default function To_Do() {
   const [showCalendar, setShowCalendar] = useState(false);
   const { userEmail } = useAuth();
 
-  if (!userEmail) {
-    console.error("User is not logged in");
-    return;
-  }
-
   useEffect(() => {
     const fetchTasks = async () => {
+      if (userEmail) {
       const tasksRef = collection(db, "users", userEmail, "Tasks");
       const q = query(tasksRef);
       const querySnapshot = await getDocs(q);
@@ -53,24 +48,26 @@ export default function To_Do() {
           ...doc.data(),
           id: doc.id,
           // Convert the Timestamp to a Date object
-          dueDate: doc.data().dueDate.toDate(), 
-        } as Task); 
+          dueDate: doc.data().dueDate.toDate(),
+        } as Task);
       });
       setTasks(fetchedTasks);
-    };
+    }
+    else {
+      console.error("User is not logged in");
+    }
+  };
     fetchTasks();
   }, [userEmail]);
 
   const addTask = async () => {
+    if (userEmail) {
     if (newTaskDueDate && newTaskName.trim() !== "") {
-      const docRef = await addDoc(
-        collection(db, "users", userEmail, "Tasks"),
-        {
-          name: newTaskName,
-          dueDate: newTaskDueDate,
-          completed: false,
-        }
-      );
+      const docRef = await addDoc(collection(db, "users", userEmail, "Tasks"), {
+        name: newTaskName,
+        dueDate: newTaskDueDate,
+        completed: false,
+      });
       setTasks([
         ...tasks,
         {
@@ -83,28 +80,36 @@ export default function To_Do() {
       setNewTaskName("");
       setNewTaskDueDate(undefined);
       setShowCalendar(false);
+    }}
+    else {
+      console.error("User is not logged in");
     }
   };
 
   const deleteTask = async (taskId: string) => {
-    await deleteDoc(doc(db, "users", userEmail, "Tasks", taskId));
-    setTasks(tasks.filter((task) => task.id !== taskId));
+    if (userEmail) {
+      await deleteDoc(doc(db, "users", userEmail, "Tasks", taskId));
+      setTasks(tasks.filter((task) => task.id !== taskId));
+    } else {
+      console.error("User is not logged in");
+    }
   };
 
   const toggleTaskCompletion = async (taskId: string) => {
-    const taskRef = doc(db, "users", userEmail, "Tasks", taskId);
-    await updateDoc(taskRef, {
-      completed: !tasks.find((task) => task.id === taskId)!.completed,
-    });
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId
-          ? { ...task, completed: !task.completed }
-          : task
-      )
-    );
+    if (userEmail) {
+      const taskRef = doc(db, "users", userEmail, "Tasks", taskId);
+      await updateDoc(taskRef, {
+        completed: !tasks.find((task) => task.id === taskId)!.completed,
+      });
+      setTasks(
+        tasks.map((task) =>
+          task.id === taskId ? { ...task, completed: !task.completed } : task
+        )
+      );
+    } else {
+      console.error("User is not logged in");
+    }
   };
-
   return (
     <div key="1" className="flex flex-col min-h-screen">
       <header className="bg-gray-900 text-white py-4 px-6">
@@ -133,9 +138,7 @@ export default function To_Do() {
                 placeholder="Pick a date..."
                 type="text"
                 value={
-                  newTaskDueDate
-                    ? newTaskDueDate.toLocaleDateString()
-                    : ""
+                  newTaskDueDate ? newTaskDueDate.toLocaleDateString() : ""
                 }
                 onFocus={() => setShowCalendar(true)}
                 readOnly
@@ -189,12 +192,11 @@ export default function To_Do() {
                   </Button>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-      Due date:{" "}
-      {task.dueDate
-        ? task.dueDate.toLocaleDateString() // Now task.dueDate is a Date object
-        : "N/A"
-      }
-    </p>
+                  Due date:{" "}
+                  {task.dueDate
+                    ? task.dueDate.toLocaleDateString() // Now task.dueDate is a Date object
+                    : "N/A"}
+                </p>
               </Card>
             ))}
           </div>
