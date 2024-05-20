@@ -102,7 +102,7 @@ export default function TransactionsPage() {
     }
     setNewTransaction({ name: "", description: "", amount: 0 });
     setIsDrawerOpen(false); 
-    setIsEditing(false); // Reset isEditing after adding or updating
+    setIsEditing(false); 
     setEditingIndex(null);
   };
   

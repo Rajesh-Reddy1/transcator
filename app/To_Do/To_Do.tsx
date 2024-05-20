@@ -1,37 +1,102 @@
-'use client'
+"use client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { TrashIcon } from "@/components/icons/TrashIcon";
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar } from "@/components/ui/calendar";
 
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
-import '@/app/globals.css'
+import { useEffect, useState } from "react";
+import "@/app/globals.css";
+import { useAuth } from "@/components/AuthContext";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "@/firebaseConfig";
 
-type Task = {
+interface Task {
   name: string;
-  dueDate: string;
+  dueDate: Date;
   completed: boolean;
-};
+  id: string;
+}
 
 export default function To_Do() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTaskName, setNewTaskName] = useState('');
-  const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>(
+    undefined
+  );
+  const [showCalendar, setShowCalendar] = useState(false);
+  const { userEmail } = useAuth();
 
-  const addTask = () => {
-    setTasks([...tasks, { name: newTaskName, dueDate: newTaskDueDate, completed: false }]);
-    setNewTaskName('');
-    setNewTaskDueDate('');
+  if (!userEmail) {
+    console.error("User is not logged in");
+    return;
+  }
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const tasksRef = collection(db, "users", userEmail, "Tasks");
+      const q = query(tasksRef);
+      const querySnapshot = await getDocs(q);
+      const fetchedTasks: Task[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedTasks.push({ ...doc.data(), id: doc.id } as Task); // Type assertion
+      });
+      setTasks(fetchedTasks);
+    };
+    fetchTasks();
+  }, [userEmail]);
+
+  const addTask = async () => {
+    if (newTaskDueDate && newTaskName.trim() !== "") {
+      const docRef = await addDoc(
+        collection(db, "users", userEmail, "Tasks"),
+        {
+          name: newTaskName,
+          dueDate: newTaskDueDate,
+          completed: false,
+        }
+      );
+      setTasks([
+        ...tasks,
+        {
+          name: newTaskName,
+          dueDate: newTaskDueDate,
+          completed: false,
+          id: docRef.id,
+        },
+      ]);
+      setNewTaskName("");
+      setNewTaskDueDate(undefined);
+      setShowCalendar(false);
+    }
   };
 
-  const deleteTask = (index: number) => {
-    setTasks(tasks.filter((_, i) => i !== index));
+  const deleteTask = async (taskId: string) => {
+    await deleteDoc(doc(db, "users", userEmail, "Tasks", taskId));
+    setTasks(tasks.filter((task) => task.id !== taskId));
   };
 
-  const toggleTaskCompletion = (index: number) => {
-    setTasks(tasks.map((task, i) => i === index ? { ...task, completed: !task.completed } : task));
+  const toggleTaskCompletion = async (taskId: string) => {
+    const taskRef = doc(db, "users", userEmail, "Tasks", taskId);
+    await updateDoc(taskRef, {
+      completed: !tasks.find((task) => task.id === taskId)!.completed,
+    });
+    setTasks(
+      tasks.map((task) =>
+        task.id === taskId
+          ? { ...task, completed: !task.completed }
+          : task
+      )
+    );
   };
 
   return (
@@ -41,7 +106,13 @@ export default function To_Do() {
       </header>
       <main className="flex-1 p-6 bg-gray-100 dark:bg-gray-800">
         <div className="max-w-4xl mx-auto">
-          <form className="flex items-center mb-6" onSubmit={e => { e.preventDefault(); addTask(); }}>
+          <form
+            className="flex items-center mb-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              addTask();
+            }}
+          >
             <Input
               className="flex-1 mr-4 bg-white dark:bg-gray-950"
               placeholder="Add a new task..."
@@ -49,35 +120,71 @@ export default function To_Do() {
               value={newTaskName}
               onChange={(e) => setNewTaskName(e.target.value)}
             />
-            <Input
-              className="flex-1 mr-4 bg-white dark:bg-gray-950"
-              placeholder="Due date..."
-              type="date"
-              value={newTaskDueDate}
-              onChange={(e) => setNewTaskDueDate(e.target.value)}
-            />
+            <div className="relative flex-1 mr-4">
+              {/* Add relative positioning to the container */}
+              <Input
+                className="flex-1 mr-4 bg-white dark:bg-gray-950"
+                placeholder="Pick a date..."
+                type="text"
+                value={
+                  newTaskDueDate
+                    ? newTaskDueDate.toLocaleDateString()
+                    : ""
+                }
+                onFocus={() => setShowCalendar(true)}
+                readOnly
+              />
+              {showCalendar && (
+                <div className="absolute z-10">
+                  {/* Add relative positioning to the container */}
+                  <Calendar
+                    mode="single"
+                    selected={newTaskDueDate}
+                    onSelect={(date) => {
+                      setNewTaskDueDate(date);
+                      setShowCalendar(false);
+                    }}
+                    className="rounded-md border"
+                  />
+                </div>
+              )}
+            </div>
             <Button type="submit">Add Task</Button>
           </form>
           <div className="grid grid-cols-3 gap-4">
             {tasks.map((task, index) => (
-              <Card key={index} className="bg-white dark:bg-gray-950 p-4">
+              <Card key={task.id} className="bg-white dark:bg-gray-950 p-4">
                 <div className="flex items-center mb-2 justify-between">
                   <div className="flex items-center">
-                    <input type="checkbox" id={`task-${index}`} checked={task.completed} onChange={() => toggleTaskCompletion(index)} />
+                    <input
+                      type="checkbox"
+                      id={`task-${task.id}`}
+                      checked={task.completed}
+                      onChange={() => toggleTaskCompletion(task.id)}
+                    />
                     <label
-                      className={`ml-2 font-medium ${task.completed ? 'line-through text-gray-500 dark:text-gray-400' : ''}`}
-                      htmlFor={`task-${index}`}
+                      className={`ml-2 font-medium ${
+                        task.completed
+                          ? "line-through text-gray-500 dark:text-gray-400"
+                          : ""
+                      }`}
+                      htmlFor={`task-${task.id}`}
                     >
                       {task.name}
                     </label>
                   </div>
-                  <Button size="icon" variant="destructive" onClick={() => deleteTask(index)}>
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    onClick={() => deleteTask(task.id)}
+                  >
                     <TrashIcon className="h-4 w-4" />
                     <span className="sr-only">Delete task</span>
                   </Button>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Due date: {task.dueDate}
+                  Due date:{" "}
+                  {task.dueDate ? task.dueDate.toLocaleDateString() : "N/A"}
                 </p>
               </Card>
             ))}
