@@ -6,16 +6,24 @@ import { HistoryIcon } from "@/components/icons/HistoryIcon";
 
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import '@/app/globals.css'
-
+import { useNavigate } from "react-router-dom";
 import Home from '../Context/Context';
 import Calculator from '../Calculator/Calculator';
 import History from '../History/page';
 import Welcome from "../Welcome/page";
 import To_DOPage from "../To_Do/page";
+import { useEffect } from "react";
 
 
 
   export default function Frist() {
+    useEffect(() => {
+      // This code will only run on the client side after the component has been rendered
+      const title = document.title;
+      console.log(title);
+    }, []);
+  
+  
 
   return (
     <Router>
