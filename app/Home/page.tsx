@@ -18,12 +18,15 @@ import { useEffect } from "react";
 
   export default function Frist() {
     useEffect(() => {
-      // This code will only run on the client side after the component has been rendered
       const title = document.title;
       console.log(title);
     }, []);
   
-  
+    if (typeof document !== 'undefined') {
+      const title = document.title;
+      console.log(title);
+    }
+    
 
   return (
     <Router>
