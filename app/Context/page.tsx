@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 import Context from "./Context"; // Import your Calculator component
 
 export default function CalculatorPage() {
