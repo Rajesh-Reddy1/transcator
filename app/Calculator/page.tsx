@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import Calculator from "./Calculator"; // Import your Calculator component
 
 export default function CalculatorPage() {

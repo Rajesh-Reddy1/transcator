@@ -1,4 +1,4 @@
-'use client'
+// 'use client'
 import { Package2Icon } from "@/components/icons/Package2Icon";
 import { HomeIcon } from "@/components/icons/HomeIcon";
 import { CalculatorIcon } from "@/components/icons/CalculatorIcon";
@@ -6,7 +6,7 @@ import { HistoryIcon } from "@/components/icons/HistoryIcon";
 
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import '@/app/globals.css'
-import { useNavigate } from "react-router-dom";
+
 import Home from '../Context/Context';
 import Calculator from '../Calculator/Calculator';
 import History from '../History/page';
