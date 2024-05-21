@@ -80,6 +80,18 @@ export default function Auth() {
     
     
   };
+  // useEffect(() => {
+  //   const auth = getAuth(app);
+  //   onAuthStateChanged(auth, async (user) => {
+  //     if (user) {
+  //       const token = await user.getIdToken();
+  //       setUserToken(token);
+  //       if (user.email) {
+  //         setUserEmail(user.email);
+  //       }
+  //     }
+  //   });
+  // }, []);
   useEffect(() => {
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
@@ -91,7 +103,7 @@ export default function Auth() {
         }
       }
     });
-  }, []);
+  }, [setUserEmail, setUserToken]);
 
   return (
     <>
