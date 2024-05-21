@@ -9,6 +9,8 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import Frist from '../Home/page';
+
 
 interface MonthlyTransactionData {
   month: string;
@@ -32,11 +34,10 @@ export default function History() {
       try {
         const querySnapshot = await getDocs(transactionsRef);
         querySnapshot.forEach((doc) => {
-          // Get the timestamp from Firestore
+
           const timestamp = doc.data().dateTime; 
 
-          // Convert the timestamp to a Date object
-          const transactionDate = timestamp.toDate(); // Use toDate()
+          const transactionDate = timestamp.toDate(); 
 
           const month = transactionDate.toLocaleString("default", {
             month: "long",
@@ -66,6 +67,7 @@ export default function History() {
     fetchMonthlyTransactions();
   }, [userEmail]);
   return (
+    
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl font-bold md:text-3xl">Transactions History</h1>

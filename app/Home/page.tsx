@@ -6,16 +6,17 @@ import { HistoryIcon } from "@/components/icons/HistoryIcon";
 
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import '@/app/globals.css'
-
+import { useNavigate } from "react-router-dom";
 import Home from '../Context/Context';
 import Calculator from '../Calculator/Calculator';
 import History from '../History/page';
 import Welcome from "../Welcome/page";
 import To_DOPage from "../To_Do/page";
-import { useAuth } from '@/components/AuthContext'; 
+
+
 
   export default function Frist() {
-    const { userEmail } = useAuth();
+
   return (
     <Router>
       <div className="flex h-screen">
@@ -49,7 +50,7 @@ import { useAuth } from '@/components/AuthContext';
         
         <div className="flex-grow">
           <Routes>
-          <Route path="/" element={<Welcome />} />
+            <Route path="/" element={<Welcome />} />
             <Route path="/Context" element={<Home />} />
             <Route path="/To_do" element={<To_DOPage />} />
             <Route path="/Calculator" element={<Calculator />} />
@@ -60,3 +61,4 @@ import { useAuth } from '@/components/AuthContext';
     </Router>
   );
 }
+
