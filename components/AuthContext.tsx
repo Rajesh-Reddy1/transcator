@@ -47,6 +47,8 @@
 //     </AuthContext.Provider>
 //   );
 // }
+// components/AuthContextClient.tsx
+'use client';
 import { createContext, useContext, useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "@/firebaseConfig";
@@ -72,7 +74,7 @@ export function useAuth(): AuthContextType {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userToken, setUserToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -82,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserToken(token);
         setUserEmail(user.email);
       }
-      setLoading(false); 
+      setLoading(false);
     });
 
     return () => unsubscribe();
