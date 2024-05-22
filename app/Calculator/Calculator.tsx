@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import * as math from "mathjs";
-
+import Home from "@/app/Home/page";
 const Calculator = () => {
   const [input, setInput] = useState("");
 
@@ -19,7 +19,9 @@ const Calculator = () => {
   };
 
   return (
-    <>
+    <div className="flex h-screen">
+      <Home></Home>
+      <div className="flex-grow">
       <header className="bg-gray-900 text-white py-4 px-6">
         <h1 className="text-2xl font-bold">Calculator</h1>
       </header>
@@ -89,7 +91,8 @@ const Calculator = () => {
         </div>
       </div>
     </div>
-    </>
+    </div>
+    </div>
   );
 };
 

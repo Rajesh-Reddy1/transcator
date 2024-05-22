@@ -26,7 +26,7 @@ interface Task {
   completed: boolean;
   id: string;
 }
-
+import Home from "@/app/Home/page";
 export default function To_Do() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskName, setNewTaskName] = useState("");
@@ -111,6 +111,9 @@ export default function To_Do() {
     }
   };
   return (
+    <div className="flex h-screen">
+      <Home></Home>
+      <div className="flex-grow">
     <div key="1" className="flex flex-col min-h-screen">
       <header className="bg-gray-900 text-white py-4 px-6">
         <h1 className="text-2xl font-bold">Todo App</h1>
@@ -202,6 +205,8 @@ export default function To_Do() {
           </div>
         </div>
       </main>
+    </div>
+    </div>
     </div>
   );
 }

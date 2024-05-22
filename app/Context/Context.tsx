@@ -42,7 +42,7 @@ type Transaction = {
   description: string;
   amount: number;
 };
-
+import Home from "@/app/Home/page";
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const { userEmail } = useAuth();
@@ -101,7 +101,7 @@ export default function TransactionsPage() {
     }
     setNewTransaction({ name: "", description: "", amount: 0 });
     setIsDrawerOpen(false); 
-    setIsEditing(false); // Reset isEditing after adding or updating
+    setIsEditing(false);
     setEditingIndex(null);
   };
   
@@ -191,7 +191,9 @@ export default function TransactionsPage() {
   }
 
   return (
-    <>
+    <div className="flex h-screen">
+      <Home></Home>
+      <div className="flex-grow">
       <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40">
         <div className="flex-1">
           <span className="font-semibold text-lg">Transactions</span>
@@ -343,6 +345,7 @@ export default function TransactionsPage() {
           </Table>
         </div>
       </main>
-    </>
+      </div>
+    </div>
   );
 }

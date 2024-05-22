@@ -41,7 +41,7 @@ export default function Auth() {
         setMessage("Login successful!");
         setUserEmail(email);
         setShowSuccess(true);
-        navigate.push('./Home')
+        navigate.push('./Welcome')
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
@@ -66,7 +66,7 @@ export default function Auth() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.1, ease: "easeInOut" },
+      transition: { duration: 0.05, ease: "easeInOut" },
     },
   };
   
@@ -75,23 +75,12 @@ export default function Auth() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeInOut" },
+      transition: { duration: 0.1, ease: "easeInOut" },
     },
     
     
   };
-  // useEffect(() => {
-  //   const auth = getAuth(app);
-  //   onAuthStateChanged(auth, async (user) => {
-  //     if (user) {
-  //       const token = await user.getIdToken();
-  //       setUserToken(token);
-  //       if (user.email) {
-  //         setUserEmail(user.email);
-  //       }
-  //     }
-  //   });
-  // }, []);
+
   useEffect(() => {
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {

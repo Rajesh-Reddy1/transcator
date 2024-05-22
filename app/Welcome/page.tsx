@@ -1,13 +1,15 @@
 'use client'
 import { useAuth } from '@/components/AuthContext'; 
-
+import Home from "@/app/Home/page";
 
 export default function Welcome() {
   const { userEmail } = useAuth();
   return (
-    <>
+    <div className="flex h-screen">
+      <Home></Home>
+      <div className="flex-grow">
       <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-        <section className="container px-4 py-12 md:py-24 lg:py-32">
+        <div className="container px-4 py-12 md:py-24 lg:py-32">
           <div className="flex flex-col items-center text-center space-y-4">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Welcome {userEmail ? userEmail.split('@')[0] : ''}
@@ -20,8 +22,9 @@ export default function Welcome() {
               Transaction Manager and To-Do Manager.
             </p>
           </div>
-        </section>
+        </div>
       </main>
-    </>
+      </div>
+      </div>
   );
 }

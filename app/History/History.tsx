@@ -9,8 +9,8 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import Frist from '../Home/page';
 
+import Home from "@/app/Home/page";
 
 interface MonthlyTransactionData {
   month: string;
@@ -67,7 +67,9 @@ export default function History() {
     fetchMonthlyTransactions();
   }, [userEmail]);
   return (
-    
+    <div className="flex h-screen">
+      <Home></Home>
+      <div className="flex-grow">
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl font-bold md:text-3xl">Transactions History</h1>
@@ -105,6 +107,8 @@ export default function History() {
             )}
           </tfoot>
         </table>
+      </div>
+      </div>
       </div>
     </div>
   )
