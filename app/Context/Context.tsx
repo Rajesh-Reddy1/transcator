@@ -37,12 +37,20 @@ import {
   setDoc,
 } from "firebase/firestore";
 
+// type Transaction = {
+//   id?: string;
+//   name: string;
+//   description: string;
+//   amount: number;
+// };
 type Transaction = {
   id?: string;
   name: string;
   description: string;
   amount: number;
+  date?: string; 
 };
+
 export default function TransactionsPage() {
   const handleSaveEditTransaction = async () => {
     if (editingIndex !== null) {
@@ -108,6 +116,35 @@ export default function TransactionsPage() {
     setEditingIndex(null);
   }, []);
 
+  // const handleAddTransaction = useCallback(async () => {
+  //   if (newTransaction.amount !== 0) {
+  //     if (isEditing) {
+  //       const updatedTransactions = [...transactions];
+  //       updatedTransactions[editingIndex as number] = newTransaction;
+  //       setTransactions(updatedTransactions);
+  //       setIsEditing(false);
+  //       setEditingIndex(null);
+  //     } else {
+  //       try {
+  //         if (userEmail) {
+  //           const docRef = await addDoc(
+  //             collection(db, "users", userEmail, "transactions"),
+  //             newTransaction
+  //           );
+  //           const newTransactionWithId = { ...newTransaction, id: docRef.id };
+  //           setTransactions([...transactions, newTransactionWithId]);
+  //         }
+  //       } catch (e) {
+  //         console.error("Error adding document: ", e);
+  //       }
+  //     }
+  //   }
+  //   setNewTransaction({ name: "", description: "", amount: 0 });
+  //   setIsDrawerOpen(false);
+  //   setIsEditing(false);
+  //   setEditingIndex(null);
+  // }, [isEditing, newTransaction, transactions, editingIndex, userEmail]);
+
   const handleAddTransaction = useCallback(async () => {
     if (newTransaction.amount !== 0) {
       if (isEditing) {
@@ -121,9 +158,12 @@ export default function TransactionsPage() {
           if (userEmail) {
             const docRef = await addDoc(
               collection(db, "users", userEmail, "transactions"),
-              newTransaction
+              {
+                ...newTransaction,
+                date: new Date().toISOString(), // Add this line
+              }
             );
-            const newTransactionWithId = { ...newTransaction, id: docRef.id };
+            const newTransactionWithId = { ...newTransaction, id: docRef.id, date: new Date().toISOString() };
             setTransactions([...transactions, newTransactionWithId]);
           }
         } catch (e) {
@@ -136,7 +176,6 @@ export default function TransactionsPage() {
     setIsEditing(false);
     setEditingIndex(null);
   }, [isEditing, newTransaction, transactions, editingIndex, userEmail]);
-
   const handleEditTransaction = useCallback(
     (index: number) => {
       const transactionToEdit = transactions[index];

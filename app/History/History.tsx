@@ -34,9 +34,9 @@ export default function History() {
       try {
         const querySnapshot = await getDocs(transactionsRef);
         querySnapshot.forEach((doc) => {
-          const timestamp = doc.data().dateTime;
+          const date = doc.data().date;
 
-          const transactionDate = timestamp.toDate();
+          const transactionDate = new Date(date);
 
           const month = transactionDate.toLocaleString("default", {
             month: "long",
