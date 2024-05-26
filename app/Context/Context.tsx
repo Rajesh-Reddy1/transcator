@@ -1,3 +1,4 @@
+
 "use client";
 import {
   DrawerTrigger,
@@ -37,12 +38,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-// type Transaction = {
-//   id?: string;
-//   name: string;
-//   description: string;
-//   amount: number;
-// };
 type Transaction = {
   id?: string;
   name: string;
@@ -115,36 +110,7 @@ export default function TransactionsPage() {
     setIsEditing(false);
     setEditingIndex(null);
   }, []);
-
-  // const handleAddTransaction = useCallback(async () => {
-  //   if (newTransaction.amount !== 0) {
-  //     if (isEditing) {
-  //       const updatedTransactions = [...transactions];
-  //       updatedTransactions[editingIndex as number] = newTransaction;
-  //       setTransactions(updatedTransactions);
-  //       setIsEditing(false);
-  //       setEditingIndex(null);
-  //     } else {
-  //       try {
-  //         if (userEmail) {
-  //           const docRef = await addDoc(
-  //             collection(db, "users", userEmail, "transactions"),
-  //             newTransaction
-  //           );
-  //           const newTransactionWithId = { ...newTransaction, id: docRef.id };
-  //           setTransactions([...transactions, newTransactionWithId]);
-  //         }
-  //       } catch (e) {
-  //         console.error("Error adding document: ", e);
-  //       }
-  //     }
-  //   }
-  //   setNewTransaction({ name: "", description: "", amount: 0 });
-  //   setIsDrawerOpen(false);
-  //   setIsEditing(false);
-  //   setEditingIndex(null);
-  // }, [isEditing, newTransaction, transactions, editingIndex, userEmail]);
-
+  
   const handleAddTransaction = useCallback(async () => {
     if (newTransaction.amount !== 0) {
       if (isEditing) {
@@ -163,7 +129,12 @@ export default function TransactionsPage() {
                 date: new Date().toISOString(), // Add this line
               }
             );
-            const newTransactionWithId = { ...newTransaction, id: docRef.id, date: new Date().toISOString() };
+            // Get the ID from the Firestore document
+            const newTransactionWithId = {
+              ...newTransaction, 
+              id: docRef.id, 
+              date: new Date().toISOString(), 
+            };
             setTransactions([...transactions, newTransactionWithId]);
           }
         } catch (e) {

@@ -1,6 +1,7 @@
 // app/layout.js
 import { AuthProvider } from "@/components/AuthContext"; // Import AuthProvider
 import "./globals.css";
+
 import { Viewport } from "next";
 export default function RootLayout({
   children,
@@ -8,9 +9,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning> 
       <title>Transcator</title>
-      <body className="bg-gray-100 dark:bg-gray-900">
+      <body >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

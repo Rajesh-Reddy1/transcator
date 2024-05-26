@@ -22,8 +22,10 @@ export default function Auth() {
   const auth = getAuth(app);
   const { setUserEmail, setUserToken } = useAuth();
   const navigate = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleAuth = useCallback(async () => {
+    setLoading(true);
     try {
       let userCredential;
       if (isLogin) {
@@ -47,6 +49,8 @@ export default function Auth() {
       setError(null);
     } catch (error: any) {
       setError(error.message);
+    } finally {
+      setLoading(false);
     }
   }, [auth, email, password, isLogin, setUserToken, setUserEmail, navigate]);
 
@@ -110,12 +114,15 @@ export default function Auth() {
           </div>
           {message && <div className="text-black-500 mt-2">{message}</div>}
           {error && <div className="text-red-500 mt-2">{error}</div>}
+
           <Button
             className="w-full bg-white text-purple-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
             onClick={handleAuth}
+            disabled={loading}
           >
-            {isLogin ? "Sign in" : "Sign up"}
+            {loading ? "Loading..." : isLogin ? "Sign in" : "Sign up"}
           </Button>
+
           <Button
             className="w-full bg-white text-purple-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
             onClick={() => setIsLogin(!isLogin)}

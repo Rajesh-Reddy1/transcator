@@ -13,6 +13,7 @@ import { usePathname } from "next/navigation";
 export default function Frist() {
   const pathname = usePathname();
   const [currentPage, setCurrentPage] = useState("");
+ 
 
   useEffect(() => {
     setCurrentPage(pathname);
@@ -78,7 +79,9 @@ export default function Frist() {
         </nav>
       </div>
 
-      <div className="flex-grow"></div>
+      <div className="flex-grow">
+      
+      </div>
     </div>
   );
 }
