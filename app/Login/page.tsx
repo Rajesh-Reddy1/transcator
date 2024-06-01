@@ -67,26 +67,28 @@ export default function Auth() {
   }, [auth, setUserEmail, setUserToken]);
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-[url('texture.jpg')] bg-cover bg-center">
+    <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 via-gray-700 to-gray-600 bg-cover bg-center">
+
       <div
-        className="mx-auto max-w-[400px] space-y-6 bg-gradient-to-br from-gray-400 to-gray-600 p-6 rounded-lg shadow-lg dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900"
+        className="mx-auto max-w-[400px] space-y-6 bg-gradient-to-br from-gray-600 to-gray-900 p-6 rounded-lg shadow-lg dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900"
         style={{ border: "2px solid white" }}
       >
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold text-white dark:text-gray-100">
+          <h1 className="text-3xl font-bold text-white dark:text-red-300">
             {isLogin ? "Welcome back" : "Create account"}
           </h1>
+          
           <p className="text-gray-200 dark:text-gray-400">
             Enter your email and password to {isLogin ? "sign in" : "sign up"}.
           </p>
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-gray-200 dark:text-gray-400" htmlFor="email">
+            <Label className="text-gray-200 dark:text-red-400" htmlFor="email">
               Email
             </Label>
             <Input
-              className="bg-white/80 dark:bg-gray-800 dark:text-gray-100"
+              className="bg-white/80 dark:bg-red-800 dark:text-gray-100"
               id="email"
               placeholder="m@example.com"
               required

@@ -201,9 +201,9 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen ">
       <Home></Home>
-      <div className="flex-grow">
+      <div className="flex-grow  flex flex-col overflow-hidden">
         <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40">
           <div className="flex-1">
             <span className="font-semibold text-lg">Transactions</span>
