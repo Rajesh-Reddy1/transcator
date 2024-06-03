@@ -116,7 +116,7 @@ export default function Frist() {
         onClick={() => setCurrentPage("/Welcome")}
       >
         <Package2Icon className="w-8 h-8 fill-current" />
-        <span className="ml-2 text-sm font-bold">Manager</span>
+        <span className="ml-2 text-sm font-bold">Home</span>
       </Link>
 
       <div className="w-full px-2">
@@ -129,7 +129,7 @@ export default function Frist() {
             onClick={() => setCurrentPage("/Context")}
           >
             <HomeIcon className="w-6 h-6 stroke-current" />
-            <span className="ml-2 text-sm font-medium">Home</span>
+            <span className="ml-2 text-sm font-medium">Manager</span>
           </Link>
           <Link
             className={`flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-700 hover:text-gray-300 ${
