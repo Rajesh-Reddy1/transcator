@@ -1,5 +1,6 @@
-
 "use client";
+
+import { useState, useEffect, useCallback } from "react";
 import {
   DrawerTrigger,
   DrawerTitle,
@@ -19,72 +20,56 @@ import {
   TableBody,
   Table,
 } from "@/components/ui/table";
-import Home from "@/app/Home/page";
 import { Button } from "@/components/ui/button";
 import { PencilIcon } from "../../components/icons/PencilIcon";
 import { TrashIcon } from "../../components/icons/TrashIcon";
-import { ArrowUpDownIcon } from "@/components/icons/ArrowUpDownIcon";
-import { useCallback, useEffect, useState } from "react";
-import "@/app/globals.css";
 import { useAuth } from "@/components/AuthContext";
 import { db } from "@/firebaseConfig";
+import Home from "@/app/Home/page";
+
 import {
   addDoc,
   collection,
   deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
   query,
   setDoc,
+  serverTimestamp,
+  updateDoc,
+  where,
 } from "firebase/firestore";
+import CategoryModal from "./CategoryModal";
 
 type Transaction = {
   id?: string;
   name: string;
   description: string;
   amount: number;
-  date?: string; 
+  date?: string;
+  categoryId: string;
+};
+
+type Category = {
+  id: string;
+  name: string;
 };
 
 export default function TransactionsPage() {
-  const handleSaveEditTransaction = async () => {
-    if (editingIndex !== null) {
-      const transactionId = transactions[editingIndex].id;
-      if (!transactionId) {
-        console.error("Transaction ID is undefined");
-        return;
-      }
-      try {
-        if (userEmail) {
-          await setDoc(
-            doc(db, "users", userEmail, "transactions", transactionId),
-            newTransaction
-          );
-          const updatedTransactions = transactions.map((transaction, index) =>
-            index === editingIndex
-              ? { ...newTransaction, id: transactionId }
-              : transaction
-          );
-          setTransactions(updatedTransactions);
-        } else {
-          console.error("User is not logged in");
-        }
-      } catch (e) {
-        console.error("Error updating document: ", e);
-      }
-      setEditingIndex(null);
-    }
-    setNewTransaction({ name: "", description: "", amount: 0 });
-    setIsDrawerOpen(false);
-    setEditingIndex(null); // Close the drawer
-  };
-
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
   const { userEmail } = useAuth();
+
   const [newTransaction, setNewTransaction] = useState<Transaction>({
     name: "",
     description: "",
     amount: 0,
+    categoryId: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -110,43 +95,85 @@ export default function TransactionsPage() {
     setIsEditing(false);
     setEditingIndex(null);
   }, []);
-  
+
   const handleAddTransaction = useCallback(async () => {
     if (newTransaction.amount !== 0) {
-      if (isEditing) {
-        const updatedTransactions = [...transactions];
-        updatedTransactions[editingIndex as number] = newTransaction;
-        setTransactions(updatedTransactions);
-        setIsEditing(false);
-        setEditingIndex(null);
-      } else {
-        try {
-          if (userEmail) {
-            const docRef = await addDoc(
-              collection(db, "users", userEmail, "transactions"),
-              {
-                ...newTransaction,
-                date: new Date().toISOString(), // Add this line
-              }
-            );
-            // Get the ID from the Firestore document
-            const newTransactionWithId = {
-              ...newTransaction, 
-              id: docRef.id, 
-              date: new Date().toISOString(), 
-            };
-            setTransactions([...transactions, newTransactionWithId]);
-          }
-        } catch (e) {
-          console.error("Error adding document: ", e);
+      try {
+        if (userEmail) {
+          const docRef = await addDoc(
+            collection(db, "users", userEmail, "transactions"),
+            {
+              ...newTransaction,
+              date: serverTimestamp(),
+              categoryId: selectedCategory || "",
+            }
+          );
+          setTransactions([
+            ...transactions,
+            {
+              ...newTransaction,
+              id: docRef.id,
+              date: new Date().toISOString(),
+              categoryId: selectedCategory || "",
+            },
+          ]);
         }
+      } catch (e) {
+        console.error("Error adding document: ", e);
       }
     }
-    setNewTransaction({ name: "", description: "", amount: 0 });
+    setNewTransaction({ name: "", description: "", amount: 0, categoryId: "" });
     setIsDrawerOpen(false);
     setIsEditing(false);
     setEditingIndex(null);
-  }, [isEditing, newTransaction, transactions, editingIndex, userEmail]);
+  }, [
+    isEditing,
+    newTransaction,
+    transactions,
+    editingIndex,
+    userEmail,
+    selectedCategory,
+  ]);
+
+  const handleSaveEditTransaction = async () => {
+    if (editingIndex !== null) {
+      const transactionId = transactions[editingIndex].id;
+      if (!transactionId) {
+        console.error("Transaction ID is undefined");
+        return;
+      }
+      try {
+        if (userEmail) {
+          await setDoc(
+            doc(db, "users", userEmail, "transactions", transactionId),
+            {
+              ...newTransaction,
+              categoryId: selectedCategory || "",
+            }
+          );
+          const updatedTransactions = transactions.map((transaction, index) =>
+            index === editingIndex
+              ? {
+                  ...newTransaction,
+                  id: transactionId,
+                  categoryId: selectedCategory || "",
+                }
+              : transaction
+          );
+          setTransactions(updatedTransactions);
+        } else {
+          console.error("User is not logged in");
+        }
+      } catch (e) {
+        console.error("Error updating document: ", e);
+      }
+      setEditingIndex(null);
+    }
+    setNewTransaction({ name: "", description: "", amount: 0, categoryId: "" });
+    setIsDrawerOpen(false);
+    setEditingIndex(null);
+  };
+
   const handleEditTransaction = useCallback(
     (index: number) => {
       const transactionToEdit = transactions[index];
@@ -179,21 +206,98 @@ export default function TransactionsPage() {
     },
     [transactions, userEmail]
   );
-
   useEffect(() => {
     if (userEmail) {
-      const q = query(collection(db, "users", userEmail, "transactions"));
+      const q = query(collection(db, "users", userEmail, "categories"));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetchedCategories = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Category[];
+        setCategories(fetchedCategories);
+      });
+      return () => unsubscribe();
+    }
+  }, [userEmail]);
+
+  useEffect(() => {
+    let q;
+    if (userEmail) {
+      if (selectedCategory) {
+        q = query(
+          collection(db, "users", userEmail, "transactions"),
+          where("categoryId", "==", selectedCategory)
+        );
+      } else {
+        q = query(collection(db, "users", userEmail, "transactions"));
+      }
+
       const unsubscribe = onSnapshot(q, (snapshot) => {
         let newTransactions: Transaction[] = [];
         snapshot.forEach((doc) => {
-          newTransactions.push(doc.data() as Transaction);
+          const transactionData = doc.data();
+          const formattedDate = transactionData.date
+            ? new Date(transactionData.date.seconds * 1000).toLocaleDateString()
+            : "";
+          newTransactions.push({
+            id: doc.id,
+            ...transactionData,
+            date: formattedDate, 
+          } as Transaction);
         });
         setTransactions(newTransactions);
       });
 
       return () => unsubscribe();
     }
-  }, [userEmail]);
+  }, [userEmail, selectedCategory]);
+
+  // Add Category
+  const handleAddCategory = async (newCategory: string) => {
+    try {
+      if (userEmail) {
+        await addDoc(collection(db, "users", userEmail, "categories"), {
+          name: newCategory,
+        });
+      }
+    } catch (error) {
+      console.error("Error adding category: ", error);
+    }
+  };
+
+  const handleEditCategory = async (updatedCategory: Category) => {
+    try {
+      if (userEmail && updatedCategory.id) {
+        await setDoc(
+          doc(db, "users", userEmail, "categories", updatedCategory.id),
+          { name: updatedCategory.name }
+        );
+      }
+    } catch (error) {
+      console.error("Error updating category: ", error);
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      if (userEmail) {
+        await deleteDoc(doc(db, "users", userEmail, "categories", categoryId));
+
+        const q = query(
+          collection(db, "users", userEmail, "transactions"),
+          where("categoryId", "==", categoryId)
+        );
+
+        const snapshot = await getDocs(q);
+
+        snapshot.forEach(async (doc) => {
+          await updateDoc(doc.ref, { categoryId: "" });
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting category: ", error);
+    }
+  };
 
   if (!userEmail) {
     console.error("User is not logged in");
@@ -208,83 +312,149 @@ export default function TransactionsPage() {
           <div className="flex-1">
             <span className="font-semibold text-lg">Transactions</span>
           </div>
-          <div className="items-center flex flex-1 gap-4 md:ml-auto md:gap-2 lg:gap-4">
-            <Drawer open={isDrawerOpen}>
-              <DrawerTrigger asChild>
+          <div className="flex flex-col gap-2">
+            <div className="items-center flex flex-1 gap-4 md:ml-auto md:gap-2 lg:gap-4">
+              <div className="items-right flex flex-1 gap-4 md:ml-auto md:gap-2 lg:gap-4">
                 <Button
-                  className="ml-auto bg-gray-900 text-gray-50 hover:bg-gray-900/90 focus-visible:ring-gray-950 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+                  className=" ml-auto bg-gray-900 text-gray-50 hover:bg-gray-900/90 focus-visible:ring-gray-950 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
                   size="lg"
-                  onClick={handleOpenDrawerForAdding}
+                  onClick={() => setIsCategoryModalOpen(true)}
                 >
-                  Add Transaction
+                  Add Category
                 </Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>Add Transaction</DrawerTitle>
-                </DrawerHeader>
-                <div className="px-4 py-6 space-y-4 ">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        placeholder="Enter name"
-                        value={newTransaction.name}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">Description</Label>
-                      <Input
-                        id="description"
-                        placeholder="Enter description"
-                        value={newTransaction.description}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="amount">Total Amount</Label>
-                    <Input
-                      id="amount"
-                      placeholder="Enter amount"
-                      type="number"
-                      value={
-                        newTransaction.amount !== undefined
-                          ? newTransaction.amount
-                          : ""
-                      } // Check for undefined
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-                <DrawerFooter>
+              </div>
+              <Drawer open={isDrawerOpen}>
+                <DrawerTrigger asChild>
                   <Button
-                    type="button"
-                    onClick={
-                      isEditing
-                        ? handleSaveEditTransaction
-                        : handleAddTransaction
-                    }
+                    className="ml-auto bg-gray-900 text-gray-50 hover:bg-gray-900/90 focus-visible:ring-gray-950 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+                    size="lg"
+                    onClick={handleOpenDrawerForAdding}
                   >
-                    {isEditing ? "Update" : "Save"}
+                    Add Transaction
                   </Button>
-
-                  <DrawerClose asChild>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>
+                      {isEditing ? "Edit Transaction" : "Add Transaction"}
+                    </DrawerTitle>
+                  </DrawerHeader>
+                  <div className="px-4 py-6 space-y-4 ">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                          id="name"
+                          placeholder="Enter name"
+                          value={newTransaction.name}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="description">Description</Label>
+                        <Input
+                          id="description"
+                          placeholder="Enter description"
+                          value={newTransaction.description}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="amount">Total Amount</Label>
+                      <Input
+                        id="amount"
+                        placeholder="Enter amount"
+                        type="number"
+                        value={
+                          newTransaction.amount !== undefined
+                            ? newTransaction.amount
+                            : ""
+                        }
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <select
+                        id="category"
+                        value={newTransaction.categoryId}
+                        onChange={(e) =>
+                          setNewTransaction({
+                            ...newTransaction,
+                            categoryId: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Category (optional)</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <DrawerFooter>
                     <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsDrawerOpen(false);
-                        // Reset the isEditing state when the drawer is closed
-                      }}
+                      type="button"
+                      onClick={
+                        isEditing
+                          ? handleSaveEditTransaction
+                          : handleAddTransaction
+                      }
                     >
-                      Cancel
+                      {isEditing ? "Update" : "Save"}
                     </Button>
-                  </DrawerClose>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
+
+                    <DrawerClose asChild>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsDrawerOpen(false);
+                          setEditingIndex(null);
+                          setIsEditing(false);
+                          setNewTransaction({
+                            name: "",
+                            description: "",
+                            amount: 0,
+                            categoryId: "",
+                          });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            </div>
+          </div>
+        </header>
+        <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40">
+          <div className="flex-1">
+            <span className="font-semibold text-lg">Category</span>
+          </div>
+
+          <div className="flex gap-2 align-middle">
+            <Button
+              className=" ml-auto bg-gray-900 text-gray-50 hover:bg-gray-900/90 focus-visible:ring-gray-950 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+              variant="link"
+              onClick={() => setSelectedCategory(null)}
+            >
+              All
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={
+                  selectedCategory === category.id ? "default" : "outline"
+                }
+                onClick={() => setSelectedCategory(category.id)}
+              >
+                {category.name}
+              </Button>
+            ))}
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 mt-4">
@@ -293,22 +463,19 @@ export default function TransactionsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      Name
-                      <ArrowUpDownIcon className="w-4 h-4 text-gray-500" />
-                    </div>
+                    <div className="flex items-center gap-2">Name</div>
                   </TableHead>
                   <TableHead className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      Description
-                      <ArrowUpDownIcon className="w-4 h-4 text-gray-500" />
-                    </div>
+                    <div className="flex items-center gap-2">Description</div>
                   </TableHead>
                   <TableHead className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      Total Amount
-                      <ArrowUpDownIcon className="w-4 h-4 text-gray-500" />
-                    </div>
+                    <div className="flex items-center gap-2">Total Amount</div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer">
+                    <div className="flex items-center gap-2">Category</div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer">
+                    <div className="flex items-center gap-2">Date</div>
                   </TableHead>
                   <TableHead className="w-[80px]">Actions</TableHead>
                 </TableRow>
@@ -319,11 +486,24 @@ export default function TransactionsPage() {
                     <TableRow key={index}>
                       <TableCell>{transaction.name}</TableCell>
                       <TableCell>{transaction.description}</TableCell>
-                      <TableCell>
-                        {transaction.amount !== 0
-                          ? `${transaction.amount.toFixed(2)}`
-                          : ""}
-                      </TableCell>
+                      <TableCell>{transaction.amount.toFixed(2)}</TableCell>
+                      {selectedCategory === null ? (
+                        <TableCell>
+                          {categories.find(
+                            (category) => category.id === transaction.categoryId
+                          )?.name || "All"}
+                        </TableCell>
+                      ) : (
+                        <TableCell>
+                          {
+                            categories.find(
+                              (category) =>
+                                category.id === transaction.categoryId
+                            )?.name
+                          }
+                        </TableCell>
+                      )}
+                      <TableCell>{transaction.date}</TableCell>
                       <TableCell className="flex items-center gap-2">
                         <Button
                           className="text-blue-500"
@@ -331,6 +511,7 @@ export default function TransactionsPage() {
                           variant="outline"
                           onClick={() => handleEditTransaction(index)}
                         >
+                          {/* Edit Icon */}
                           <PencilIcon className="w-4 h-4" />
                         </Button>
                         <Button
@@ -339,6 +520,7 @@ export default function TransactionsPage() {
                           variant="outline"
                           onClick={() => handleDeleteTransaction(index)}
                         >
+                          {/* Delete Icon */}
                           <TrashIcon className="w-4 h-4" />
                         </Button>
                       </TableCell>
@@ -346,7 +528,10 @@ export default function TransactionsPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center">
+                    <TableCell
+                      colSpan={selectedCategory === null ? 6 : 5}
+                      className="text-center"
+                    >
                       No transactions. Please add transaction details.
                     </TableCell>
                   </TableRow>
@@ -355,7 +540,19 @@ export default function TransactionsPage() {
             </Table>
           </div>
         </main>
+
+        <CategoryModal
+          isOpen={isCategoryModalOpen}
+          onClose={() => setIsCategoryModalOpen(false)}
+          onAddCategory={handleAddCategory}
+          onEditCategory={handleEditCategory}
+          onDeleteCategory={handleDeleteCategory}
+          categories={categories}
+          editingCategory={editingCategory}
+          setEditingCategory={setEditingCategory}
+        />
       </div>
     </div>
   );
 }
+

@@ -27,7 +27,7 @@ const Calculator = () => {
         <header className="bg-gray-900 text-white py-4 px-6">
           <h1 className="text-2xl font-bold">Calculator</h1>
         </header>
-        <div className="calculator mx-auto sm:w-1/2 lg:w-1/3 xl:w-1/4">
+        <div className="calculator mx-auto sm:w-1/2 lg:w-1/4 xl:w-1/5">
           <div className="display">{input}</div>
           <div className="buttons grid grid-cols-4 gap-4 p-4">
             <div className="buttons">
