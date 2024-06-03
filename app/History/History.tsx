@@ -1,9 +1,10 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import "@/app/globals.css";
 import { useAuth } from "@/components/AuthContext";
 import { db } from "@/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import Home from "@/app/Home/page";
 
 interface MonthlyTransactionData {
@@ -29,39 +30,40 @@ export default function History() {
         userEmail,
         "transactions"
       );
+
+      // Fetch all transactions for the logged in user
+      const querySnapshot = await getDocs(transactionsRef);
       const monthlyTransactionsData: MonthlyTransactionData[] = [];
 
-      try {
-        const querySnapshot = await getDocs(transactionsRef);
-        querySnapshot.forEach((doc) => {
-          const date = doc.data().date;
+      querySnapshot.forEach((doc) => {
+        const transactionData = doc.data();
 
-          const transactionDate = new Date(date);
+        const transactionDate = new Date(
+          transactionData.date.seconds * 1000
+        );
 
-          const month = transactionDate.toLocaleString("default", {
-            month: "long",
-          });
-          const year = transactionDate.getFullYear();
-
-          const existingMonthData = monthlyTransactionsData.find(
-            (data) => data.month === `${month} ${year}`
-          );
-
-          if (existingMonthData) {
-            existingMonthData.transactionsCount++;
-            existingMonthData.totalAmount += doc.data().amount;
-          } else {
-            monthlyTransactionsData.push({
-              month: `${month} ${year}`,
-              transactionsCount: 1,
-              totalAmount: doc.data().amount,
-            });
-          }
+        const month = transactionDate.toLocaleString("default", {
+          month: "long",
         });
-        setMonthlyTransactions(monthlyTransactionsData);
-      } catch (error) {
-        console.error("Error fetching monthly transactions:", error);
-      }
+        const year = transactionDate.getFullYear();
+
+        const existingMonthData = monthlyTransactionsData.find(
+          (data) => data.month === `${month} ${year}`
+        );
+
+        if (existingMonthData) {
+          existingMonthData.transactionsCount++;
+          existingMonthData.totalAmount += transactionData.amount;
+        } else {
+          monthlyTransactionsData.push({
+            month: `${month} ${year}`,
+            transactionsCount: 1,
+            totalAmount: transactionData.amount,
+          });
+        }
+      });
+
+      setMonthlyTransactions(monthlyTransactionsData);
     };
     fetchMonthlyTransactions();
   }, [userEmail]);
@@ -80,60 +82,66 @@ export default function History() {
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full table-auto border-collapse text-left">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-800">
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
-                    Month
-                  </th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
-                    Transactions
-                  </th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
-                    Total Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyTransactions.map((data, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-gray-200 dark:border-gray-700"
-                  >
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {data.month}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {data.transactionsCount}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      ${data.totalAmount.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                {monthlyTransactions.length > 0 && (
+            {monthlyTransactions.length > 0 ? (
+              <table className="w-full table-auto border-collapse text-left">
+                <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
-                      Total
-                    </td>
-                    <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
-                      {monthlyTransactions.reduce(
-                        (total, data) => total + data.transactionsCount,
-                        0
-                      )}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
-                      $
-                      {monthlyTransactions
-                        .reduce((total, data) => total + data.totalAmount, 0)
-                        .toFixed(2)}
-                    </td>
+                    <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
+                      Month
+                    </th>
+                    <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
+                      Transactions
+                    </th>
+                    <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
+                      Total Amount
+                    </th>
                   </tr>
-                )}
-              </tfoot>
-            </table>
+                </thead>
+                <tbody>
+                  {monthlyTransactions.map((data, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-200 dark:border-gray-700"
+                    >
+                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                        {data.month}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                        {data.transactionsCount}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                        ${data.totalAmount.toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  {monthlyTransactions.length > 0 && (
+                    <tr className="bg-gray-100 dark:bg-gray-800">
+                      <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
+                        Total
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
+                        {monthlyTransactions.reduce(
+                          (total, data) => total + data.transactionsCount,
+                          0
+                        )}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">
+                        $
+                        {monthlyTransactions
+                          .reduce((total, data) => total + data.totalAmount, 0)
+                          .toFixed(2)}
+                      </td>
+                    </tr>
+                  )}
+                </tfoot>
+              </table>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-6">
+                No transactions found.
+              </p>
+            )}
           </div>
         </div>
       </div>
