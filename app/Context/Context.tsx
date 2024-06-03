@@ -252,7 +252,6 @@ export default function TransactionsPage() {
     }
   }, [userEmail, selectedCategory]);
 
-  // Add Category
   const handleAddCategory = async (newCategory: string) => {
     try {
       if (userEmail) {
