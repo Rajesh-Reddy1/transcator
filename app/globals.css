@@ -81,8 +81,8 @@
 
 
 .calculator {
-  width: 80px;
-
+  width: 60%;
+  
   margin: 20px auto;
   background-color: #1c1c1c;
   border-radius: 20px;
@@ -144,4 +144,8 @@
 
 .btn.wide {
   flex: 2;
-}
+} 
+
+
+
+
