@@ -21,13 +21,13 @@ const Calculator = () => {
     setInput(input.slice(0, -1));
   };
   return (
-    <div className="flex flex-col sm:flex-row h-screen">
-      <Home />
-      <div className="flex-grow">
-        <header className="bg-gray-900 text-white py-4 px-6">
-          <h1 className="text-2xl font-bold">Calculator</h1>
+
+<div className="flex flex-col lm:flex-row h-screen  "  >
+      <div className="flex-grow"> 
+        <header className="bg-gray-900 text-white py-4 px-6 rounded-md">
+          <h1 className="text-2xl font-bold c">Calculator</h1>
         </header>
-        <div className="calculator mx-auto sm:w-1/2 lg:w-1/4 xl:w-1/5">
+        <div className="calculator mx-auto sm:w-1/2 lg:w-1/4 xl:w-1/5 px-0">
           <div className="display">{input}</div>
           <div className="buttons grid grid-cols-4 gap-4 p-4">
             <div className="buttons">
@@ -102,9 +102,10 @@ const Calculator = () => {
           </div>
         </div>
       </div>
+      <Home></Home>
     </div>
+
   );
 };
 
 export default Calculator;
-
