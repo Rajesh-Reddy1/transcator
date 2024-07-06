@@ -187,6 +187,19 @@ export default function Frist() {
               </Link>
               <Link
                 className={`flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-700 hover:text-gray-300 ${
+                  currentPage === "/Daily" ? 'text-white bg-gray-700' : ''
+                }`}
+                href="/Daily"
+                onClick={() => {
+                  setCurrentPage("/Daily");
+                  setIsMenuOpen(false); // Close the menu after clicking
+                }}
+              >
+                <HistoryIcon className="w-6 h-6 stroke-current text-white" />
+                <span className="ml-2 text-sm font-medium text-white">Daily Tasks</span>
+              </Link>
+              <Link
+                className={`flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-700 hover:text-gray-300 ${
                   currentPage === "/Calculator" ? 'text-white bg-gray-700' : ''
                 }`}
                 href="/Calculator"
