@@ -34,7 +34,6 @@ import {
 
 import { CircleIcon, MoreHorizontalIcon } from "lucide-react";
 import Home from "@/app/Home/page";
-// ... (Your Icon components - CheckIcon, CircleIcon, MoreHorizontalIcon, CalendarIcon -  imported or defined) ...
 import { db } from "@/firebaseConfig";
 interface Task {
   id: string;
@@ -419,7 +418,6 @@ export default function Component() {
               </Droppable>
             </div>
 
-            {/* "Completed Tasks" Section */}
             <div>
               <div className="rounded-lg border border-muted bg-background p-4 shadow">
                 <h2 className="mb-4 text-lg font-bold">Completed</h2>

@@ -1,6 +1,3 @@
-// "use client";
- // Import your Calculator component
-
 import Daily from "./Daily";
 
 export default function CalculatorPage() {
