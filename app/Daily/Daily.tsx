@@ -54,7 +54,7 @@ interface Task {
   completedDate?: Date | null;
 }
 
-export default function Daily() {
+export default function App() {
   const { userEmail } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({
