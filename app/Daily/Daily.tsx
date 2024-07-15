@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -34,9 +33,13 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
-import dayjs from "dayjs"; 
-import { CheckIcon, CircleIcon, CalendarIcon ,DotsHorizontalIcon} from '@radix-ui/react-icons';
-
+import dayjs from "dayjs";
+import {
+  CheckIcon,
+  CircleIcon,
+  CalendarIcon,
+  DotsHorizontalIcon,
+} from "@radix-ui/react-icons";
 
 interface Task {
   id: string;
@@ -47,7 +50,7 @@ interface Task {
   dueDate: Date;
   completed: boolean;
   completionNote?: string;
-  completedDate?: Date |null; 
+  completedDate?: Date | null;
 }
 
 export default function Component() {
@@ -76,11 +79,14 @@ export default function Component() {
         );
 
         const querySnapshot = await getDocs(q);
-        const fetchedTasks: Task[] = querySnapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-          dueDate: doc.data().dueDate.toDate(),
-        } as Task));
+        const fetchedTasks: Task[] = querySnapshot.docs.map(
+          (doc) =>
+            ({
+              ...doc.data(),
+              id: doc.id,
+              dueDate: doc.data().dueDate.toDate(),
+            } as Task)
+        );
 
         setTasks(fetchedTasks);
       } else {
@@ -99,8 +105,8 @@ export default function Component() {
             ...newTask,
             completed: false,
             dueDate: new Date(newTask.dueDate),
-            completionNote: "", 
-            completedDate: null, 
+            completionNote: "",
+            completedDate: null,
           }
         );
         setTasks([
@@ -133,9 +139,7 @@ export default function Component() {
         const taskRef = doc(db, "users", userEmail, "Tasks", id);
         await updateDoc(taskRef, updates);
         setTasks(
-          tasks.map((task) =>
-            task.id === id ? { ...task, ...updates } : task
-          )
+          tasks.map((task) => (task.id === id ? { ...task, ...updates } : task))
         );
       } catch (e) {
         console.error("Error updating document: ", e);
@@ -153,7 +157,7 @@ export default function Component() {
         await updateDoc(taskRef, {
           completed: !task.completed,
           completionNote: completionNote || "",
-          completedDate: !task.completed ? serverTimestamp() : null, 
+          completedDate: !task.completed ? serverTimestamp() : null,
         });
         setTasks(
           tasks.map((t) =>
@@ -162,7 +166,7 @@ export default function Component() {
                   ...t,
                   completed: !t.completed,
                   completionNote: completionNote || "",
-                  completedDate: !t.completed ? new Date() : null, 
+                  completedDate: !t.completed ? new Date() : null,
                 }
               : t
           )
@@ -307,7 +311,10 @@ export default function Component() {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={`rounded-lg border transition-colors mb-4 ${
-                                !task.completed && dayjs(task.dueDate).isBefore(dayjs().startOf("day"))
+                                !task.completed &&
+                                dayjs(task.dueDate).isBefore(
+                                  dayjs().startOf("day")
+                                )
                                   ? "border-red-500 text-red-500"
                                   : task.priority === "high"
                                   ? "border-red-500"
@@ -334,9 +341,7 @@ export default function Component() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() =>
-                                      handleCompleteTask(task.id)
-                                    }
+                                    onClick={() => handleCompleteTask(task.id)}
                                   >
                                     {task.completed ? (
                                       <CheckIcon className="h-5 w-5" />
@@ -351,7 +356,7 @@ export default function Component() {
                                         size="icon"
                                         className="rounded-full"
                                       >
-                                        <DotsHorizontalIcon className="h-5 w-5" /> 
+                                        <DotsHorizontalIcon className="h-5 w-5" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
@@ -523,10 +528,7 @@ export default function Component() {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <CalendarIcon className="h-4 w-4" />
                             <span>
-                              Due:{" "}
-                              {new Date(
-                                task.dueDate
-                              ).toLocaleDateString()}
+                              Due: {new Date(task.dueDate).toLocaleDateString()}
                             </span>
                           </div>
                           {task.completedDate && (
