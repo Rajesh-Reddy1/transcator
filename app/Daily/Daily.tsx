@@ -296,7 +296,7 @@ export default function Component() {
                     className="rounded-lg border border-muted bg-background p-4 shadow"
                   >
                     <h2 className="mb-4 text-lg font-bold">
-                      Today's Tasks ({dayjs().format("MMMM D, YYYY")})
+                      {`Today's Tasks (${dayjs().format("MMMM D, YYYY")})`}
                     </h2>
                     <div>
                       {tasks.map((task, index) => (
