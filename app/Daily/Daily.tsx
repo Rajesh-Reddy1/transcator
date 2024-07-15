@@ -18,7 +18,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useAuth } from "@/components/AuthContext"; 
 import {
   collection,
@@ -315,7 +315,7 @@ export default function Component() {
                                       }
                                     >
                                       {task.completed ? (
-                                        <CheckIcon className="h-5 w-5" />
+                                        <Icon className="h-5 w-5" />
                                       ) : (
                                         <CircleIcon className="h-5 w-5" />
                                       )}
@@ -444,7 +444,7 @@ export default function Component() {
                               size="icon"
                               onClick={() => handleCompleteTask(task.id)}
                             >
-                              <CheckIcon className="h-5 w-5" />
+                              <Icon className="h-5 w-5" />
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -522,7 +522,7 @@ function CalendarIcon(props : any) {
 }
 
 
-function CheckIcon(props : any) {
+function Icon(props : any) {
   return (
     <svg
       {...props}
