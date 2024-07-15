@@ -192,7 +192,7 @@ export default function Frist() {
                 href="/Daily"
                 onClick={() => {
                   setCurrentPage("/Daily");
-                  setIsMenuOpen(false); // Close the menu after clicking
+                  setIsMenuOpen(false); 
                 }}
               >
                 <HistoryIcon className="w-6 h-6 stroke-current text-white" />

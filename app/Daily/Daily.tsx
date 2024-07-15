@@ -40,6 +40,7 @@ import {
   CalendarIcon,
   DotsHorizontalIcon,
 } from "@radix-ui/react-icons";
+import Home from "@/app/Home/page";
 
 interface Task {
   id: string;
@@ -562,6 +563,7 @@ export default function Daily() {
           </DragDropContext>
         </div>
       </main>
+      <Home></Home>
     </div>
   );
 }
