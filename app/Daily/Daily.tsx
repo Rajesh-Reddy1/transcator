@@ -205,14 +205,7 @@ export default function Daily() {
         <div className="container mx-auto flex items-center justify-between px-4 md:px-6">
           <h1 className="text-2xl font-bold">Daily Tasks</h1>
           <div className="flex items-center gap-4">
-            <Button
-              onClick={handleAddTask}
-              className="rounded-md px-4 py-2 text-sm font-medium"
-            >
-              Add Task
-            </Button>
             <Avatar>
-              <AvatarImage src="/placeholder-user.jpg" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
           </div>

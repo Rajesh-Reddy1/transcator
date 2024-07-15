@@ -1,8 +1,7 @@
-// import Daily from "./Daily/Daily";
 import Auth from "./Login/page";
 import "./globals.css";
 
-export default function AppI() {
+export default function App() {
   return <Auth></Auth>;
-  // return <Daily></Daily>
+  
 }
